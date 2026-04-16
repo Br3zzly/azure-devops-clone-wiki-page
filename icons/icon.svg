@@ -1,0 +1,10 @@
+<!--
+  Source SVG for the extension icons. Renders to icons/icon{16,48,128}.png.
+  To regenerate after changing colors/shape, run the PowerShell script in the
+  build comment in package or just re-render via System.Drawing using these
+  exact rect coordinates (matches the in-menu icon at content.js buildDuplicateRow).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 20 20" fill="none">
+  <rect x="6.5" y="1"   width="11.5" height="11.5" rx="1.8" stroke="#0078d4" stroke-width="1.7"/>
+  <rect x="1"   y="6.5" width="11.5" height="11.5" rx="1.8" fill="#0078d4" fill-opacity="0.15" stroke="#0078d4" stroke-width="1.7"/>
+</svg>

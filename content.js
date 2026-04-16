@@ -315,22 +315,38 @@ function injectIntoMenu(menuRoot) {
   });
 }
 
-// ── MutationObserver — detect context menu portals ───────────────────────────
+// ── MutationObserver — detect context menu portals ──────────────────────────
+//
+// Scoped to ADO's portal host (where callouts/menus are mounted) so we don't
+// fire on every unrelated SPA mutation. The host may not exist at content-
+// script load, so a one-shot bootstrap observer waits for it.
 
-new MutationObserver(mutations => {
-  for (const mut of mutations) {
-    for (const node of mut.addedNodes) {
-      if (node.nodeType !== 1) continue;
-      // The node itself could be the move-page row, or it could be a container holding it
-      const menu = node.id === '__bolt-move-page'
-        ? node.closest('[role="menu"]')?.closest('[id$="-callout"]') || node.parentElement
-        : node.querySelector('#__bolt-move-page')
-          ? node
-          : null;
-      if (menu) injectIntoMenu(menu);
+function watchForContextMenu(host) {
+  new MutationObserver(mutations => {
+    for (const mut of mutations) {
+      for (const node of mut.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        const menu = node.id === '__bolt-move-page'
+          ? node.closest('[role="menu"]')?.closest('[id$="-callout"]') || node.parentElement
+          : node.querySelector?.('#__bolt-move-page')
+            ? node
+            : null;
+        if (menu) injectIntoMenu(menu);
+      }
     }
-  }
-}).observe(document.body, { childList: true, subtree: true });
+  }).observe(host, { childList: true, subtree: true });
+}
+
+const portalHost = document.querySelector('.bolt-portal-host');
+if (portalHost) {
+  watchForContextMenu(portalHost);
+} else {
+  const bootstrap = new MutationObserver(() => {
+    const host = document.querySelector('.bolt-portal-host');
+    if (host) { bootstrap.disconnect(); watchForContextMenu(host); }
+  });
+  bootstrap.observe(document.body, { childList: true, subtree: true });
+}
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -501,7 +517,7 @@ function renderBoltTree(tbody, rootNode, targetPath, onSelect, wikiId) {
 
 // ── Dialog ───────────────────────────────────────────────────────────────────
 
-function showDuplicateDialog(info) {
+async function showDuplicateDialog(info) {
   if (!info) { showToast('Could not detect wiki page info for cloning.', 'error'); return; }
 
   document.getElementById('ado-dup-overlay')?.remove();
@@ -510,131 +526,7 @@ function showDuplicateDialog(info) {
   overlay.id = 'ado-dup-overlay';
   overlay.className = 'bolt-portal absolute-fill';
   overlay.style.zIndex = '999999';
-  overlay.innerHTML = `
-    <div class="flex-row flex-grow">
-      <div class="bolt-panel bolt-callout absolute absolute-fill flex-end flex-column" tabindex="-1">
-        <div class="absolute-fill bolt-light-dismiss bolt-callout-modal" id="ado-dup-dismiss"></div>
-        <div class="bolt-panel-callout-content scroll-auto relative bolt-callout-content bolt-callout-shadow flex-grow flex-column bolt-callout-large"
-             role="dialog" aria-modal="true" aria-labelledby="ado-dup-dialog-title">
-      <div class="bolt-panel-root flex-column flex-grow scroll-auto">
-        <div class="bolt-panel-focus-element no-outline" tabindex="-1"></div>
-
-        <div class="bolt-panel-header bolt-header-with-commandbar bolt-header flex-row flex-noshrink flex-start bolt-default-horizontal-spacing bolt-header-default">
-          <div class="bolt-header-content-area flex-row flex-grow flex-self-stretch">
-            <div class="bolt-header-title-area flex-column flex-grow scroll-hidden">
-              <div class="bolt-header-title-row flex-row flex-baseline">
-                <div aria-level="1" class="text-ellipsis bolt-header-title title-m l" id="ado-dup-dialog-title" role="heading">Clone</div>
-              </div>
-            </div>
-            <div class="flex-self-start bolt-header-commandbar bolt-button-group flex-row">
-              <div class="flex-self-start bolt-header-commandbar-button-group flex-row flex-center flex-grow scroll-hidden rhythm-horizontal-8">
-                <button aria-label="Close" class="bolt-header-command-item-button bolt-button bolt-icon-button enabled subtle icon-only bolt-focus-treatment" id="ado-dup-close" role="button" tabindex="0" type="button">
-                  <span class="fluent-icons-enabled"><span aria-hidden="true" class="left-icon flex-noshrink fabric-icon ms-Icon--Clear medium"></span></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bolt-panel-content flex-row flex-grow scroll-auto bolt-default-horizontal-spacing">
-          <div class="page-move-panel-content flex-column flex-grow">
-            <div id="ado-dup-loading" class="flex-row flex-center" style="gap:10px;padding:20px 0;justify-content:center">
-              <div class="ado-dup-spinner flex-noshrink"></div>
-              <span>Loading wiki…</span>
-            </div>
-            <div id="ado-dup-tree-pane" class="wiki-tree-pane relative flex-column flex-grow" style="display:none">
-              <div class="absolute-fill flex-column flex-grow">
-
-                <div class="wiki-tree-filterbar flex-center vss-FilterBar" role="toolbar">
-                  <div class="vss-FilterBar--list">
-                    <div class="vss-FilterBar--item vss-FilterBar--item-keyword-container">
-                      <div class="flex-column flex-grow">
-                        <div class="bolt-text-filterbaritem flex-grow bolt-textfield flex-row flex-center focus-keyboard-only">
-                          <span class="fluent-icons-enabled"><span aria-hidden="true" class="keyword-filter-icon prefix bolt-textfield-icon bolt-textfield-no-text flex-noshrink fabric-icon ms-Icon--Edit medium"></span></span>
-                          <input type="text" autocomplete="off" id="ado-dup-name" class="bolt-text-filterbaritem-input bolt-textfield-input flex-grow bolt-textfield-input-with-prefix" maxlength="200" placeholder="Enter page name" tabindex="0" value="" spellcheck="false"/>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="wiki-tree-filterbar flex-center vss-FilterBar" role="toolbar">
-                  <div class="vss-FilterBar--list">
-                    <div class="vss-FilterBar--item vss-FilterBar--item-keyword-container">
-                      <div class="flex-column flex-grow">
-                        <div class="bolt-text-filterbaritem flex-grow bolt-textfield flex-row flex-center focus-keyboard-only">
-                          <span class="fluent-icons-enabled"><span aria-hidden="true" class="keyword-filter-icon prefix bolt-textfield-icon bolt-textfield-no-text flex-noshrink fabric-icon ms-Icon--Filter medium"></span></span>
-                          <input type="text" autocomplete="off" aria-label="Filter pages by title" id="ado-dup-filter" class="bolt-text-filterbaritem-input bolt-textfield-input flex-grow bolt-textfield-input-with-prefix" maxlength="200" placeholder="Filter pages by title" role="searchbox" tabindex="0" value=""/>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="vss-FilterBar--right-items">
-                      <div class="vss-FilterBar--action vss-FilterBar--action-clear">
-                        <button aria-disabled="true" aria-label="Clear filters" id="ado-dup-filter-clear" class="filter-bar-button bolt-button bolt-icon-button disabled subtle icon-only bolt-focus-treatment" role="button" tabindex="-1" type="button">
-                          <span class="fluent-icons-enabled"><span aria-hidden="true" class="left-icon flex-noshrink fabric-icon ms-Icon--Cancel medium"></span></span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="bolt-table-container flex-grow v-scroll-auto">
-                  <table class="bolt-table bolt-list body-m relative scroll-hidden" role="tree" tabindex="0" style="width:100%">
-                    <colgroup><col style="width:8px"><col style="width:100%"><col style="width:8px"></colgroup>
-                    <tbody id="ado-dup-tree" class="relative" role="presentation"></tbody>
-                  </table>
-                </div>
-
-                <div class="flex-row flex-center flex-noshrink" style="padding:8px 16px;gap:7px">
-                  <div id="ado-dup-subpages" class="toggle bolt-toggle-button cursor-pointer disabled">
-                    <div aria-checked="false" aria-disabled="true" aria-label="Include subpages" class="bolt-toggle-button-pill bolt-focus-treatment flex-noshrink" data-is-focusable="true" role="switch" tabindex="-1">
-                      <div class="bolt-toggle-button-icon"></div>
-                    </div>
-                    <div class="bolt-toggle-button-text body-m">Include subpages</div>
-                  </div>
-                  <span id="ado-dup-subcount" style="font-size:11.5px;opacity:.7"></span>
-                </div>
-
-              </div>
-            </div>
-            <div id="ado-dup-error" class="flex-row" style="display:none;gap:7px;margin:8px 16px;padding:9px 11px;background:var(--status-error-background,#fde7e9);border-left:3px solid var(--status-error-text,#a4262c);border-radius:0 2px 2px 0;color:var(--status-error-text,#a4262c);font-size:12.5px;line-height:1.45">
-              <span id="ado-dup-errmsg"></span>
-            </div>
-            <div id="ado-dup-progress" style="display:none;padding:14px 16px 4px">
-              <div class="flex-row" style="justify-content:space-between;margin-bottom:8px;font-size:12.5px">
-                <span id="ado-dup-progtxt">Cloning…</span>
-                <span id="ado-dup-progcnt" style="opacity:.7;font-variant-numeric:tabular-nums"></span>
-              </div>
-              <div class="ado-dup-progress-bar-wrap">
-                <div id="ado-dup-progbar" class="ado-dup-progress-bar" style="width:0%"></div>
-              </div>
-            </div>
-            <div id="ado-dup-success" class="flex-row flex-center" style="display:none;gap:10px;padding:12px 16px 4px;color:var(--status-success-text,#107c10);font-size:13px">
-              <div>
-                <div id="ado-dup-succmsg" style="font-weight:600"></div>
-                <a id="ado-dup-link" href="#" target="_blank" rel="noopener" style="display:none;font-size:12px">Open new page</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="ado-dup-footer" class="bolt-panel-footer flex-center bolt-default-horizontal-spacing">
-          <div class="bolt-panel-footer-buttons flex-grow bolt-button-group flex-row">
-            <button id="ado-dup-cancel" class="bolt-button enabled bolt-focus-treatment" role="button" tabindex="0" type="button">
-              <span class="bolt-button-text body-m">Cancel</span>
-            </button>
-            <button id="ado-dup-submit" class="bolt-button disabled primary bolt-focus-treatment" aria-disabled="true" role="button" tabindex="-1" type="button">
-              <span class="bolt-button-text body-m">Clone</span>
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-    </div>
-    </div>
-    </div>
-  `;
+  overlay.innerHTML = await fetch(chrome.runtime.getURL('dialog.html')).then(r => r.text());
 
   const portalHost = document.querySelector('.bolt-portal-host') || document.body;
   portalHost.appendChild(overlay);
@@ -796,20 +688,28 @@ function showDuplicateDialog(info) {
       succMsg.textContent = `${total - failed} of ${total} copied. ${failed} failed.`;
       succMsg.style.color = '#a4262c';
     }
-    if (firstPage) {
-      const link = $('ado-dup-link');
-      link.href = `https://dev.azure.com/${org}/${project}/_wiki/wikis/${wikiId}/${firstPage.id}`;
-      link.style.display = 'block';
-    }
+    const btnContainer = footer.querySelector('.bolt-panel-footer-buttons');
+    btnContainer.innerHTML = '';
+
     const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
     closeBtn.className = 'bolt-button enabled bolt-focus-treatment';
     closeBtn.innerHTML = '<span class="bolt-button-text body-m">Close</span>';
     closeBtn.onclick = close;
-    const btnContainer = footer.querySelector('.bolt-panel-footer-buttons');
-    btnContainer.innerHTML = '';
     btnContainer.appendChild(closeBtn);
+
+    if (firstPage) {
+      const gotoBtn = document.createElement('button');
+      gotoBtn.type = 'button';
+      gotoBtn.className = 'bolt-button enabled primary bolt-focus-treatment';
+      gotoBtn.innerHTML = '<span class="bolt-button-text body-m">Go to cloned page</span>';
+      gotoBtn.onclick = () => {
+        window.location.href = `https://dev.azure.com/${org}/${project}/_wiki/wikis/${wikiId}/${firstPage.id}`;
+        close();
+      };
+      btnContainer.appendChild(gotoBtn);
+    }
     footer.style.display = 'flex';
-    setTimeout(close, 6000);
   });
 }
 
