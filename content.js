@@ -263,7 +263,7 @@ function buildDuplicateRow(pageCtx, focusZone) {
   iconTd.innerHTML = `
     <div class="bolt-menuitem-cell-content bolt-menuitem-cell-icon flex-row">
       <span class="fluent-icons-enabled">
-        <span aria-hidden="true" class="flex-noshrink ado-dup-icon-wrap">
+        <span aria-hidden="true" class="flex-noshrink" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px">
           <svg width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="6.5" y="1" width="11.5" height="11.5" rx="1.8" stroke="currentColor" stroke-width="1.7"/>
             <rect x="1" y="6.5" width="11.5" height="11.5" rx="1.8" fill="currentColor" fill-opacity="0.15" stroke="currentColor" stroke-width="1.7"/>
@@ -538,8 +538,8 @@ function showDuplicateDialog(info) {
 
         <div class="bolt-panel-content flex-row flex-grow scroll-auto bolt-default-horizontal-spacing">
           <div class="page-move-panel-content flex-column flex-grow">
-            <div id="ado-dup-loading" class="ado-dup-loading">
-              <div class="ado-dup-spinner"></div>
+            <div id="ado-dup-loading" class="flex-row flex-center" style="gap:10px;padding:20px 0;justify-content:center">
+              <div class="ado-dup-spinner flex-noshrink"></div>
               <span>Loading wiki…</span>
             </div>
             <div id="ado-dup-tree-pane" class="wiki-tree-pane relative flex-column flex-grow" style="display:none">
@@ -592,24 +592,24 @@ function showDuplicateDialog(info) {
                     </div>
                     <div class="bolt-toggle-button-text body-m">Include subpages</div>
                   </div>
-                  <span id="ado-dup-subcount" class="ado-dup-subpage-count"></span>
+                  <span id="ado-dup-subcount" style="font-size:11.5px;opacity:.7"></span>
                 </div>
 
               </div>
             </div>
-            <div id="ado-dup-error" class="ado-dup-error" style="display:none">
+            <div id="ado-dup-error" class="flex-row" style="display:none;gap:7px;margin:8px 16px;padding:9px 11px;background:var(--status-error-background,#fde7e9);border-left:3px solid var(--status-error-text,#a4262c);border-radius:0 2px 2px 0;color:var(--status-error-text,#a4262c);font-size:12.5px;line-height:1.45">
               <span id="ado-dup-errmsg"></span>
             </div>
-            <div id="ado-dup-progress" class="ado-dup-progress" style="display:none">
-              <div class="ado-dup-progress-label">
+            <div id="ado-dup-progress" style="display:none;padding:14px 16px 4px">
+              <div class="flex-row" style="justify-content:space-between;margin-bottom:8px;font-size:12.5px">
                 <span id="ado-dup-progtxt">Cloning…</span>
-                <span id="ado-dup-progcnt" class="ado-dup-progress-count"></span>
+                <span id="ado-dup-progcnt" style="opacity:.7;font-variant-numeric:tabular-nums"></span>
               </div>
               <div class="ado-dup-progress-bar-wrap">
                 <div id="ado-dup-progbar" class="ado-dup-progress-bar" style="width:0%"></div>
               </div>
             </div>
-            <div id="ado-dup-success" class="ado-dup-success" style="display:none">
+            <div id="ado-dup-success" class="flex-row flex-center" style="display:none;gap:10px;padding:12px 16px 4px;color:var(--status-success-text,#107c10);font-size:13px">
               <div>
                 <div id="ado-dup-succmsg" style="font-weight:600"></div>
                 <a id="ado-dup-link" href="#" target="_blank" rel="noopener" style="display:none;font-size:12px">Open new page</a>
