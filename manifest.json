@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Azure Devops Clone Wiki page",
+  "version": "3.0.0",
+  "description": "Adds a Clone option to the Azure DevOps wiki page context menu.",
+  "host_permissions": [
+    "https://dev.azure.com/*",
+    "https://*.visualstudio.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://dev.azure.com/*/_wiki/*",
+        "https://*.visualstudio.com/*/_wiki/*"
+      ],
+      "js": ["content.js"],
+      "css": ["modal.css"]
+    }
+  ],
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

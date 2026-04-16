@@ -1,0 +1,132 @@
+/* ─── ADO Wiki Duplicator ────────────────────────────────────────────────────── */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   1. INJECTED MENU ITEM  (inside ADO's own bolt-menuitem-row <tr>)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.ado-dup-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   2. DUPLICATE DIALOG
+   Uses ADO's native Bolt panel + callout classes for positioning and styling.
+   Only custom styles below are for elements ADO doesn't provide.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Loading spinner ─────────────────────────────────────────────────────────── */
+
+.ado-dup-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 0;
+  justify-content: center;
+}
+
+.ado-dup-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--palette-black-alpha-20, #e1dfdd);
+  border-top-color: var(--communication-background, #0078d4);
+  border-radius: 50%;
+  animation: adodup-spin .7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes adodup-spin { to { transform: rotate(360deg) } }
+
+.ado-dup-subpage-count { font-size: 11.5px; opacity: .7; }
+
+/* ── Error ───────────────────────────────────────────────────────────────────── */
+
+.ado-dup-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 8px 16px;
+  padding: 9px 11px;
+  background: var(--status-error-background, #fde7e9);
+  border-left: 3px solid var(--status-error-text, #a4262c);
+  border-radius: 0 2px 2px 0;
+  color: var(--status-error-text, #a4262c);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* ── Progress ────────────────────────────────────────────────────────────────── */
+
+.ado-dup-progress { padding: 14px 16px 4px; }
+
+.ado-dup-progress-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+}
+
+.ado-dup-progress-count { opacity: .7; font-variant-numeric: tabular-nums; }
+
+.ado-dup-progress-bar-wrap {
+  width: 100%;
+  height: 4px;
+  background: var(--palette-black-alpha-20, #e1dfdd);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ado-dup-progress-bar {
+  height: 100%;
+  background: var(--communication-background, #0078d4);
+  border-radius: 2px;
+  transition: width .25s ease;
+}
+
+/* ── Success ─────────────────────────────────────────────────────────────────── */
+
+.ado-dup-success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 4px;
+  color: var(--status-success-text, #107c10);
+  font-size: 13px;
+}
+
+.ado-dup-success a { text-decoration: none; }
+.ado-dup-success a:hover { text-decoration: underline; }
+
+/* ── Selected tree row highlight ─────────────────────────────────────────────── */
+
+#ado-dup-overlay .bolt-tree-row.selected {
+  background: var(--palette-primary-tint-40, rgba(0,120,212,.1));
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────────── */
+
+.ado-dup-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000000;
+  padding: 10px 15px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,.18);
+  animation: adodup-toast .18s ease;
+  max-width: 340px;
+}
+
+.ado-dup-toast--error { background: #a4262c; color: #fff; }
+.ado-dup-toast--info  { background: #323130; color: #fff; }
+
+@keyframes adodup-toast {
+  from { transform: translateY(8px); opacity: 0 }
+  to   { transform: translateY(0);   opacity: 1 }
+}
