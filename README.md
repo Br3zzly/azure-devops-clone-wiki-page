@@ -5,10 +5,10 @@ Makes cloning of wiki pages (and subpages) in Azure DevOps Wikis possible via a 
 
 ## Install
 
-Get the extension on the Chrome Web Store:
+Get the extension on the Chrome Web Store:  
 https://chromewebstore.google.com/detail/azure-devops-wiki-clone-p/ndfegibldghikdekddhaolpkdidmaklo
 
-Install it manually with the latest zip file in the [/releases](releases) folder by following this guide:
+Install it manually with the latest zip file in the [/releases](releases) folder by following this guide:  
 https://developer.chrome.com/docs/extensions/get-started/tutorial/hello-world#load-unpacked
 
 ![Screenshot 1](screenshots/store_screenshot_1.png)
